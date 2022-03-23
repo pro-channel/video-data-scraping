@@ -9,7 +9,7 @@ if (!keyWord) {
 }
 
 var maxDate = Number(process.argv[3])
-if (!maxDate) {
+if (!maxDate && maxDate !== 0) {
     maxDate = 3
 }
 
