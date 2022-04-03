@@ -3,24 +3,28 @@ const cheerio = require('cheerio')
 const fs = require("fs")
 const { add } = require('cheerio/lib/api/traversing')
 
+// キーワード引数の取得
 var keyWord = process.argv[2]
 if (!keyWord) {
     keyWord = ""
 }
 
+// 追加日引数の取得
 var maxDate = Number(process.argv[3])
 if (!maxDate && maxDate !== 0) {
     maxDate = 3
 }
 
+// 動画サイトURL
 const siteUrl = "https://www.tokyomotion.net"
 
-// URL原型
+// 検索結果ページのURL原型
 const baseUrl = siteUrl + "/search?search_query=" + encodeURI(keyWord) + '&search_type=videos'
 
 // 1pageのビデオ数
 const videoCount = 20
 
+// 
 const stream = fs.createWriteStream("./list.csv", {flags:"w"});
 stream.on("error", (err)=>{
     if(err)
@@ -29,7 +33,11 @@ stream.on("error", (err)=>{
       process.exit(0)
 });
 
-// ページのビデオデータ取得処理
+/**
+ * 検索結果ページの動画情報を取得と書き込みを行う
+ * @param {*} nowPage 取得するページ番号
+ * @param {*} lastPage 最終ページの番号
+ */
 const getPageData = (nowPage, lastPage) => {
     reqest(
         (baseUrl + "&page=" + nowPage),
@@ -63,21 +71,23 @@ const getPageData = (nowPage, lastPage) => {
 
             }
 
+            console.log("page:" + nowPage)
 
             if (nowPage >= lastPage) {
                 // 書き込み終了
-                console.log("page:" + nowPage)
                 console.log("end")
                 stream.end("\n");
             }
 
-            // 次ページ書き込み
-            console.log("page:" + nowPage)
+            // 次ページへ
             getPageData(nowPage + 1, lastPage)
         }
     )
 }
 
+/**
+ * メイン処理
+ */
 reqest(
     baseUrl ,
     (error, response, body) => {
